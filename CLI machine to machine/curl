@@ -1,0 +1,9 @@
+curl --request POST \
+  --url https://dev-pip2r20aaaid2plx.us.auth0.com/oauth/token \
+  --header 'content-type: application/json' \
+  --data '{"client_id":"ahafG6lG5xjne7OEJnReR26RPmLqhjhk","client_secret":"X9WJAtSOMAlKK5K8eC65rrvP1hjH0-Nc44ZHVfLJoWcuqTUPZaZFaOORwE7TtyqH","audience":"https://my-api-endpoint/","grant_type":"client_credentials"}'
+
+
+  curl --request GET \
+  --url http://path_to_your_api/ \
+  --header 'authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkFDZWRack1lMW5UdDhERkVob1dGciJ9.eyJpc3MiOiJodHRwczovL2Rldi1waXAycjIwYWFhaWQycGx4LnVzLmF1dGgwLmNvbS8iLCJzdWIiOiJhaGFmRzZsRzV4am5lN09FSm5SZVIyNlJQbUxxaGpoa0BjbGllbnRzIiwiYXVkIjoiaHR0cHM6Ly9teS1hcGktZW5kcG9pbnQvIiwiaWF0IjoxNjg5ODc4MDUxLCJleHAiOjE2ODk5NjQ0NTEsImF6cCI6ImFoYWZHNmxHNXhqbmU3T0VKblJlUjI2UlBtTHFoamhrIiwic2NvcGUiOiJyZWFkOmFwcG9pbnRtZW50cyB3cml0ZTphcHBvaW50bWVudHMgZGVsZXRlOmFwcG9pbnRtZW50cyIsImd0eSI6ImNsaWVudC1jcmVkZW50aWFscyJ9.Q_oqSs3rk_NnGU9cDO2609hHe6H0MoHLtrH2sEz4LfjmtZ4nhoEqZfWuerakV2BrjZ0pTTdG4ScNXD6d9vBD57x2A9sl4m-U0jVPt485kPcOeLKCLAJ6maRIMpkTJz6lDTgW3LZe4TnK77VSjKeBS5EyxDSG1jcSIu62qYiVGg2nr51V7S5g9wnyTzPQz4zBEzR2Z0LjKkra5WL5Oh929UqPKyFy-wgjEe25HC7O_C52vQ2My8X9MKDypRrYozT38-6tD5LtYYS2dQ4U1d7Fjil4aqYrdXdM1MSJEDvZ0cjwJTXktj0XY0sABYrdascHkQ8xZOoPzZKyGHoNLC6ocw'

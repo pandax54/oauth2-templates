@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "rootDir": "./",
+    "outDir": "./build",
+    "allowJs": true,
+    "module": "CommonJS",
+    "target": "ES2019",
+    "skipLibCheck": true,
+    "lib": ["ESNext"],
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "paths": {
+      "@app/db": ["src/database/"],
+      "@app/models/*": ["src/models/*"],
+      "@app/*": ["src/*"],
+      "@test/*": ["test/*"]
+    }
+  },
+  "include": ["./src/**/*", "./test/**/*", "./*.json"],
+  "exclude": ["node_modules", "build", "dev", "coverage"],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs"
+    },
+    "transpileOnly": true,
+    "require": ["tsconfig-paths/register"]
+  }
+}
