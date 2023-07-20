@@ -1,5 +1,4 @@
-// import camelcaseKeys from 'camelcase-keys'
-// const camelcaseKeys = import('camelcase-keys')
+import camelCaseKeys from 'camelcase-keys'
 import { ClientMetadata, generators, Issuer, IssuerMetadata, TokenSet } from 'openid-client'
 import snakecaseKeys from 'snakecase-keys'
 // import urlJoin from 'url-join'
@@ -95,17 +94,13 @@ export function createClient(input: { storeUrl?: string; platform: OAuthPlatform
         ...input.extraParams,
       })
 
-      // return camelcaseKeys(tokenSet, { deep: true }) as CC<TokenSet>
-      const tokens = new TokenSet(tokenSet)
-      return tokens
+      return camelCaseKeys(tokenSet, { deep: true }) as CC<TokenSet>
     },
     async refreshTokenSet(input: { refreshToken: string }) {
       const tokenSet = await client.refresh(input.refreshToken)
       // grantType: 'refresh_token',
 
-      // return camelcaseKeys(tokenSet, { deep: true }) as CC<TokenSet>
-      const tokens = new TokenSet(tokenSet)
-      return tokens
+      return camelCaseKeys(tokenSet, { deep: true }) as CC<TokenSet>
     },
     userinfo<TUserInfo>(
       accessToken: string,
