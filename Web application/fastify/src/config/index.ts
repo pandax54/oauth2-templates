@@ -22,9 +22,9 @@ const schema = Type.Object({
   //   })
   JWT_SECRET: Type.String({ default: 'super-secret' }),
   JWT_STORE_CONNECTION_SECRET: Type.String({ default: 'top-secret' }),
-  OAUTH_CLIENT_ID: Type.String({ default: 'client_id' }),
-  OAUTH_CLIENT_SECRET: Type.String({ default: 'client_secret' }),
-  OAUTH_ISSUER: Type.String({ default: 'https://example.com' }),
+  OAUTH_CLIENT_ID: Type.String({ default: '03cIFgtakuuddqV7ZS8qVYuWJr7xg6LN' }),
+  OAUTH_CLIENT_SECRET: Type.String({ default: 'zEyqyyJFFFVBbIWJFbwkVfWincHk-JR7EhyyS5OXkGJ1n2h7R809yTT8h-oBeV66' }),
+  OAUTH_ISSUER: Type.String({ default: 'https://dev-pip2r20aaaid2plx.us.auth0.com/' }),
   OAUTH_APP_NAME: Type.String({ default: 'My APP' }),
   OAUTH_REDIRECT_URI: Type.String({ default: 'http://localhost:3000/stores' }),
 })

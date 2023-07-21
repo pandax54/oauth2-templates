@@ -28,15 +28,17 @@ const oauthProviders: {
       "write:appointments",
       "delete:appointments"
     ],
-    codeVerifier: 'custom-code',
-    redirectUri: 'http://localhost:8000//oauth/callback',
+    codeVerifier: 'c55729e2222908b5780080ff4ad8fc9812612c6e293444ba65048152', // make it dynamic using db
+    redirectUri: 'http://localhost:8005/oauth/callback',
     codeAlgorithm: 'S256',
     client: {
       clientId: config.oauth.clientid,
       clientSecret: config.oauth.clientSecret,
       responseTypes: ['code'],
     },
+    // openID config: https://dev-pip2r20aaaid2plx.us.auth0.com/.well-known/openid-configuration 
     issuer: {
+      jwksUri: 'https://dev-pip2r20aaaid2plx.us.auth0.com/.well-known/jwks.json',
       issuer: config.oauth.issuer,
       authorizationEndpoint: 'https://dev-pip2r20aaaid2plx.us.auth0.com/authorize',
       tokenEndpoint: 'https://dev-pip2r20aaaid2plx.us.auth0.com/oauth/token',
@@ -87,10 +89,12 @@ export function createClient(input: { storeUrl?: string; platform: OAuthPlatform
     async createTokenSet(input: { url?: string, extraParams?: Record<string, unknown> }) {
       const params = client.callbackParams(input?.url)
 
-      const tokenSet = await client.oauthCallback(providerConfig.redirectUri, params, {
+      // client.callback() instead of client.oauthCallback() if you don't need to validate the state
+      const tokenSet = await client.callback(providerConfig.redirectUri, params, {
         state: params.state,
-        response_type: 'code',
         code_verifier: providerConfig.codeVerifier,
+        // response_type: 'code',
+        // grant_type: 'authorization_code'
         ...input.extraParams,
       })
 
@@ -98,7 +102,6 @@ export function createClient(input: { storeUrl?: string; platform: OAuthPlatform
     },
     async refreshTokenSet(input: { refreshToken: string }) {
       const tokenSet = await client.refresh(input.refreshToken)
-      // grantType: 'refresh_token',
 
       return camelCaseKeys(tokenSet, { deep: true }) as CC<TokenSet>
     },

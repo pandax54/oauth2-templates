@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import * as oauthService from '@app/services/oauth2'
 import { OAuthPlatform } from '@app/common/enums'
+// import { authorize } from '@app/plugins/authorization'
 
 export const oauthRoutes = async (app: FastifyInstance): Promise<void> => {
   app.route({
@@ -8,7 +9,7 @@ export const oauthRoutes = async (app: FastifyInstance): Promise<void> => {
     url: '/oauth-connect',
     handler: async (req: FastifyRequest, reply: FastifyReply) => {
       const client = oauthService.createClient({ platform: OAuthPlatform.OAUTH })
-      const url = client.getAuthorizationUrl({ state: 'test' })
+      const url = client.getAuthorizationUrl({ state: '79db51f0ae12083bffe3bc231b4afe156dce967437a3b7f4a11ee725' })
       reply.redirect(url)
     },
     schema: {
@@ -22,9 +23,6 @@ export const oauthRoutes = async (app: FastifyInstance): Promise<void> => {
     method: 'GET',
     url: '/redirect',
     handler: async (req: FastifyRequest, reply: FastifyReply) => {
-      console.log('redirect')
-      console.log(req.query)
-      console.log(req.body)
       reply.send('redirect')
     },
     schema: {
@@ -34,19 +32,19 @@ export const oauthRoutes = async (app: FastifyInstance): Promise<void> => {
     },
   })
 
-
   app.route({
     method: 'GET',
     url: '/callback',
-    handler: async (req: FastifyRequest<{ Params: { code: string, state: string } }>, reply: FastifyReply) => {
-      const { code, state } = req.params
-      if (state !== 'test') {
+    handler: async (req: FastifyRequest<{ Querystring: { code: string, state: string } }>, reply: FastifyReply) => {
+      const { code, state } = req.query
+      // make state dynamic, but also if you're using PKCE it's not necessary
+      if (state != '79db51f0ae12083bffe3bc231b4afe156dce967437a3b7f4a11ee725') {
         throw new Error('Invalid state')
       }
-      console.log(req.query)
-      // https://13a5-168-195-163-80.ngrok-free.app/callback?code=bei3giXqqxHu9cKI4x-FFgvkHcL_CzY-wXRW4BMp3U_im&state=test
+      // example: url/callback?code=bei3giXqqxHu9cKI4x-FFgvkHcL_CzY-wXRW4BMp3U_im&state=test
       const client = oauthService.createClient({ platform: OAuthPlatform.OAUTH })
-      const tokenSet = await client.createTokenSet({ extraParams: { code } })
+      const tokenSet = await client.createTokenSet({ url: req.url, extraParams: { code } })
+
       reply.send(tokenSet)
     },
     schema: {
@@ -57,11 +55,28 @@ export const oauthRoutes = async (app: FastifyInstance): Promise<void> => {
   })
 
   app.route({
-    method: 'GET',
+    method: 'POST',
+    url: '/refresh-token',
+    handler: async (req: FastifyRequest<{ Body: { refresh: string } }>, reply: FastifyReply) => {
+      // refresh token should be store in db
+      const { refresh } = req.body
+      const client = oauthService.createClient({ platform: OAuthPlatform.OAUTH })
+      const tokenSet = await client.refreshTokenSet({refreshToken: refresh})
+      reply.send(tokenSet)
+    },
+    schema: {
+      querystring: {},
+      tags: ['OAuth'],
+      description: 'Use refresh token to generate new token set',
+    },
+  })
+
+  app.route({
+    method: 'POST',
     url: '/user-info',
+    // preHandler: authorize, // add Bearer token for requests TODO create user and add token to db
     handler: async (req: FastifyRequest<{ Body: { accessToken: string } }>, reply: FastifyReply) => {
-      console.log('user-info')
-      console.log(req.body)
+      // store access token in db
       const client = oauthService.createClient({ platform: OAuthPlatform.OAUTH })
       const user = await client.userinfo(req.body.accessToken, { method: 'GET' })
       reply.send(user)
