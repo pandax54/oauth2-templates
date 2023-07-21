@@ -104,6 +104,31 @@ You can use the `id_token` to get the user information.
 You access this information using any base64url tool https://example-app.com/base64
 
 
+## PKCE (Proof Key for Code Exchange)
+
+is an essential security enhancement to the OAuth 2.0 authorization flow, designed to prevent certain types of attacks and protect sensitive user data. It was introduced to address a specific vulnerability in the authorization code flow known as the "Authorization Code Interception" attack.
+
+In the traditional OAuth 2.0 authorization code flow, the client (application) redirects the user to the authorization server to grant permissions. The authorization server then returns an authorization code to the client, which is exchanged for an access token to access the protected resources on behalf of the user.
+
+However, the initial OAuth 2.0 authorization code flow has a potential security weakness when used in public clients (such as mobile apps or single-page web applications) due to the fact that the client secret is not securely stored in these environments. This could allow malicious actors to intercept the authorization code during the redirection process from the authorization server to the client and use it to request access tokens, posing a security risk.
+
+PKCE addresses this vulnerability by adding an extra step to the OAuth 2.0 authorization code flow. The client generates a random value called the "code verifier" and computes its SHA-256 hash, creating the "code challenge." The code challenge is sent to the authorization server along with the initial authorization request. The authorization server stores this code challenge temporarily.
+
+To create `code_verifier` you need to create a random string with 43 characters. You can use the following code 
+
+https://tonyxu-io.github.io/pkce-generator/
+
+The `state` parameter was originally used for CSRF protection, but PKCE provides that. Therefore, Because of PCKE you don't need to worry about state parameter anymore. Nowadays you can use it for storing application-specific state, such as which page to redirect the user to after they log in, cart or checkout.
+
+If the server doesn't support PKCE, then you will still need to make the state a random value for each request.
+
+You also need to include the `code_challenge_method` parameters in the authorization request. 
+
+The `code_challenge_method` parameter is optional and defaults to `plain`. The `code_challenge` parameter is required and must be a Base64 URL-encoded string of the SHA-256 hash of the `code_verifier` string.
+
+
+[further readings](https://pazel.dev/teach-me-pkce-proof-key-for-code-exchange-in-5-minutes)
+
 
 
 ## What's next?
