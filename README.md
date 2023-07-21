@@ -129,7 +129,38 @@ The `code_challenge_method` parameter is optional and defaults to `plain`. The `
 
 [further readings](https://pazel.dev/teach-me-pkce-proof-key-for-code-exchange-in-5-minutes)
 
+## Client Credentials Flow
 
+This flow is used when the application needs to access its own resources, not on behalf of a user. For example, a cron job that needs to access a database to perform some maintenance.
+
+The client credentials flow is a server-to-server flow. There is no user authentication involved in the process. Instead, the system authenticates itself with the authorization server so the client can access the resources it needs.
+
+
+The type of application you will need for this type of flow usually is a machine-to-machine ou service account type of option.
+If no one of this options are available at least chose one that will provide to you a `client_id` and `client_secret`.
+
+In order to get an access token, you'll be making a POST request to the token endpoint with the following parameters: `grant_type=client_credentials`
+
+If you're requesting a down-scoped token, then you'll also include `scope` with the scopes you need.
+
+The only thing to look out for now is how to include the client credentials in the request. The authorization server may either want the client credentials in the post body or in an HTTP header as Basic Auth, and this is going to depend on the server you're working with.
+
+Once you make this request to the token endpoint, if everything works out, then the response looks the same as every other access token response.
+
+You probably won't get back a refresh tokens since there isn't really any benefit the refresh token can provide.
+Refresh tokens give the application a way to get new access tokens without the user being present. So if there's no user involved in the flow, then there's no need to have a way to avoid interrupting them.
+
+So once you've got the access token, you are ready to use it to make API requests.
+
+This access token might still have an expiration date. It's again up to the server to decide how long these access tokens last.
+And if it does expire, you don't have a refresh token, but that's fine because you just make the same request again and get back a new access token.
+
+```
+curl -X POST https://example/oauth/token \
+  -d grant_type=client_credentials \
+  -d client_id={YOUR_CLIENT_ID} \
+  -d client_secret={YOUR_CLIENT_SECRET}
+```
 
 ## What's next?
 We put together a few examples of how to use Express OpenID Connect in more advanced use cases:
