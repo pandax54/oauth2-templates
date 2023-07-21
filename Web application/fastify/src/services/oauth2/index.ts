@@ -42,7 +42,8 @@ const oauthProviders: {
       issuer: config.oauth.issuer,
       authorizationEndpoint: 'https://dev-pip2r20aaaid2plx.us.auth0.com/authorize',
       tokenEndpoint: 'https://dev-pip2r20aaaid2plx.us.auth0.com/oauth/token',
-      userinfoEndpoint: 'https://dev-pip2r20aaaid2plx.us.auth0.com/userinfo'
+      userinfoEndpoint: 'https://dev-pip2r20aaaid2plx.us.auth0.com/userinfo',
+      introspectionEndpoint: 'https://dev-pip2r20aaaid2plx.us.auth0.com/oauth/token', // The Introspection endpoint is an optional OIDC endpoint that allows the client to check the validity of an access token. Not always available though.
     },
   },
 }
@@ -70,11 +71,20 @@ export function createClient(input: { storeUrl?: string; platform: OAuthPlatform
   const client = new issuer.Client(snakecaseKeys(clientOptions, { deep: true }))
 
   return {
+    getIssuerInfo(url: string) {
+      // This method discovers the OpenID Connect provider's configuration by querying the well-known OpenID Connect discovery document at the given url. It retrieves important information such as the issuer's endpoints, supported scopes, claims, and other OIDC-related configurations
+      return Issuer.discover(url)
+    },
+    async introspectToken(accessToken: string) {
+      return client.introspect(accessToken)
+    },
     getAuthorizationUrl(input: { state: string;[key: string]: unknown }) {
       // const codeVerifier = generators.codeVerifier()
       const codeChallenge = generators.codeChallenge(providerConfig.codeVerifier)
 
       const { state, ...params } = input
+
+      console.log('metadata:', client.issuer.metadata)
 
       return client.authorizationUrl({
         state,
@@ -91,10 +101,18 @@ export function createClient(input: { storeUrl?: string; platform: OAuthPlatform
 
       // client.callback() instead of client.oauthCallback() if you don't need to validate the state
       const tokenSet = await client.callback(providerConfig.redirectUri, params, {
+        code_verifier: providerConfig.codeVerifier,
+        ...input.extraParams,
+      })
+
+      return camelCaseKeys(tokenSet, { deep: true }) as CC<TokenSet>
+    },
+    async createTokenSetWithState(input: { url?: string, extraParams?: Record<string, unknown> }) {
+      const params = client.callbackParams(input?.url)
+
+      const tokenSet = await client.oauthCallback(providerConfig.redirectUri, params, {
         state: params.state,
         code_verifier: providerConfig.codeVerifier,
-        // response_type: 'code',
-        // grant_type: 'authorization_code'
         ...input.extraParams,
       })
 
@@ -105,10 +123,20 @@ export function createClient(input: { storeUrl?: string; platform: OAuthPlatform
 
       return camelCaseKeys(tokenSet, { deep: true }) as CC<TokenSet>
     },
+    async revokeToken(input: { token: string; tokenTypeHint?: string }) {
+      // tokenTypeHint:  'access_token' | 'refresh_token' | string;
+      return client.revoke(input.token, input.tokenTypeHint)
+    },
     userinfo<TUserInfo>(
       accessToken: string,
       options?: { method?: 'GET' | 'POST'; via?: 'header' | 'body'; tokenType?: string, params?: Record<string, unknown> }
     ) {
+      const token = new TokenSet({ access_token: accessToken }) // add expires_at / expires_in 
+      // console.log('token:', token.claims()) // id_token needs to be present in TokenSet
+      // https://github.com/panva/node-openid-client/blob/main/docs/README.md#tokensetexpired
+      if (token.expired()) {
+        throw new Error('Token expired')
+      }
       return client.userinfo<TUserInfo>(accessToken, options)
     },
   }

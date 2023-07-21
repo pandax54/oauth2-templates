@@ -4,6 +4,23 @@ import { OAuthPlatform } from '@app/common/enums'
 // import { authorize } from '@app/plugins/authorization'
 
 export const oauthRoutes = async (app: FastifyInstance): Promise<void> => {
+  
+  app.route({
+    method: 'POST',
+    url: '/issuer',
+    handler: async (req: FastifyRequest<{ Body: { url: string } }>, reply: FastifyReply) => {
+      const { url } = req.body
+      const client = oauthService.createClient({ platform: OAuthPlatform.OAUTH })
+      const issuer = await client.getIssuerInfo(url)
+      reply.send(issuer)
+    },
+    schema: {
+      querystring: {},
+      tags: ['OAuth'],
+      description: 'Redirect to app',
+    },
+  })
+
   app.route({
     method: 'GET',
     url: '/oauth-connect',
@@ -78,6 +95,11 @@ export const oauthRoutes = async (app: FastifyInstance): Promise<void> => {
     handler: async (req: FastifyRequest<{ Body: { accessToken: string } }>, reply: FastifyReply) => {
       // store access token in db
       const client = oauthService.createClient({ platform: OAuthPlatform.OAUTH })
+      // const token = await client.introspectToken(req.body.accessToken)
+      // console.log('token:', token)
+      // if (token.active) {
+      //   throw new Error('Token is not active')
+      // }
       const user = await client.userinfo(req.body.accessToken, { method: 'GET' })
       reply.send(user)
     },
